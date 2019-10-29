@@ -39,7 +39,24 @@ With this setting, the following access logs will be printed.
 I, [2019-03-15T00:00:00.000000 #30034]  INFO -- : {"remote_addr":"127.0.0.1","accessed_at":"2019-03-15 00:00:00.000000","params":"{\"value\":\"World\"}","user_agent":"grpc-node/1.19.0 grpc-c/7.0.0 (linux; chttp2; gold)","grpc_method":"/test.Test/HelloRpc","grpc_metadata":"{\"user-agent\":\"grpc-node/1.19.0 grpc-c/7.0.0 (linux; chttp2; gold)\"}","grpc_status_code":0,"response_time_ms":0.0}
 ```
 
-You can also use your custom logger.
+### The information in the access log
+
+You can get information for the following fields.
+
+| Field Name | Meaning |
+| -- | -- |
+| accessed_at | The time that the request was received  |
+| grpc_metadata | [gRPC's metadata](https://grpc.io/docs/guides/concepts/#metadata) |
+| grpc_method | A path string (cf. [gRPC over HTTP2](https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md)) |
+| grpc_status_code | [Status codes in gRPC](https://github.com/grpc/grpc/blob/master/doc/statuscodes.md) |
+| params | Request parameter in JSON |
+| remote_addr |  IP address of a client (e.g. `"127.0.0.1"`) |
+| response_time_ms | Response time (ms) |
+| user_agent | User agent (e.g. `"grpc_health_probe grpc-go/1.17.0"`) |
+
+### Custom Logger
+
+You can use your custom logger.
 
 ```ruby
 server = GRPC::RpcServer.new(
