@@ -45,6 +45,8 @@ module GrpcAccessLoggingInterceptor
       log(data)
     end
 
+    # NOTE: For now, we don't support server_streamer, client_streamer and bidi_streamer
+
   private
 
     # @param [Object] peer
