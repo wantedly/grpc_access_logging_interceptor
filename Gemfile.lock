@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    grpc_access_logging_interceptor (0.0.1)
+    grpc_access_logging_interceptor (0.0.2)
       grpc
 
 GEM
