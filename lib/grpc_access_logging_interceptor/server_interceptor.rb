@@ -7,7 +7,7 @@ module GrpcAccessLoggingInterceptor
 
     # @param [#log] logger
     # @param [#filter, nil] params_filter
-    # @param [#call, nil] custom_data_provider
+    # @param [#call, #execute, nil] custom_data_provider
     def initialize(logger: DefaultLogger.new, params_filter: nil, custom_data_provider: nil)
       @logger               = logger
       @params_filter        = params_filter
@@ -91,7 +91,13 @@ module GrpcAccessLoggingInterceptor
     # @return [Hash]
     def custom_data(request:, call:, method:)
       if @custom_data_provider
-        @custom_data_provider.call(request, call, method)
+        if @custom_data_provider.respond_to?(:call)
+          @custom_data_provider.call(request, call, method)
+        elsif @custom_data_provider.respond_to?(:execute)
+          @custom_data_provider.execute(request, call, method)
+        else
+          raise "custom_data_provider must support #execute or #call!"
+        end
       else
         {}
       end

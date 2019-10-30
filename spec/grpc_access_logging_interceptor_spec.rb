@@ -119,40 +119,85 @@ describe GrpcAccessLoggingInterceptor do
     end
 
     context "when a custom_data_provider is specified" do
-      let(:options) {
-        {
-          custom_data_provider: -> (request, call, method) {
+      context "when custom_data_provider is proc" do
+        let(:options) {
+          {
+            custom_data_provider: -> (request, call, method) {
+              {
+                custom_data_provider: true,
+                request:              request,
+                call:                 call,
+                method:               method,
+              }
+            }
+          }
+        }
+
+        it "logs an access log with custom data" do
+          Timecop.freeze(Time.new(2019, 3, 15, 0, 0)) do
+            interceptor.request_response(request: request, call: call, method: method) {}
+          end
+
+          expect(mocked_logger.logged).to eq [
             {
+              accessed_at:          "2019-03-15 00:00:00.000000",
+              grpc_metadata:        "{\"user-agent\":\"grpc-node/1.19.0 grpc-c/7.0.0 (linux; chttp2; gold)\"}",
+              grpc_method:          "/test.Test/HelloRpc",
+              grpc_status_code:     0,
+              params:               "{\"value\":\"World\"}",
+              remote_addr:          "127.0.0.1",
+              response_time_ms:     0.0,
+              user_agent:           "grpc-node/1.19.0 grpc-c/7.0.0 (linux; chttp2; gold)",
               custom_data_provider: true,
               request:              request,
               call:                 call,
               method:               method,
             }
+          ]
+        end
+      end
+
+      context "when custom_data_provider is an object with #execute method" do
+        let(:options) {
+          {
+            custom_data_provider: custom_data_provider_class.new
           }
         }
-      }
+        let(:custom_data_provider_class) {
+          Class.new do
+            def execute(request, call, method)
+              {
+                custom_data_provider: true,
+                request:              request,
+                call:                 call,
+                method:               method,
+              }
+            end
+          end
+        }
 
-      it "logs an access log with custom data" do
-        Timecop.freeze(Time.new(2019, 3, 15, 0, 0)) do
-          interceptor.request_response(request: request, call: call, method: method) {}
+        it "logs an access log with custom data" do
+          Timecop.freeze(Time.new(2019, 3, 15, 0, 0)) do
+            interceptor.request_response(request: request, call: call, method: method) {}
+          end
+
+          expect(mocked_logger.logged).to eq [
+            {
+              accessed_at:          "2019-03-15 00:00:00.000000",
+              grpc_metadata:        "{\"user-agent\":\"grpc-node/1.19.0 grpc-c/7.0.0 (linux; chttp2; gold)\"}",
+              grpc_method:          "/test.Test/HelloRpc",
+              grpc_status_code:     0,
+              params:               "{\"value\":\"World\"}",
+              remote_addr:          "127.0.0.1",
+              response_time_ms:     0.0,
+              user_agent:           "grpc-node/1.19.0 grpc-c/7.0.0 (linux; chttp2; gold)",
+              custom_data_provider: true,
+              request:              request,
+              call:                 call,
+              method:               method,
+            }
+          ]
         end
-
-        expect(mocked_logger.logged).to eq [
-          {
-            accessed_at:          "2019-03-15 00:00:00.000000",
-            grpc_metadata:        "{\"user-agent\":\"grpc-node/1.19.0 grpc-c/7.0.0 (linux; chttp2; gold)\"}",
-            grpc_method:          "/test.Test/HelloRpc",
-            grpc_status_code:     0,
-            params:               "{\"value\":\"World\"}",
-            remote_addr:          "127.0.0.1",
-            response_time_ms:     0.0,
-            user_agent:           "grpc-node/1.19.0 grpc-c/7.0.0 (linux; chttp2; gold)",
-            custom_data_provider: true,
-            request:              request,
-            call:                 call,
-            method:               method,
-          }
-        ]
       end
     end
   end
