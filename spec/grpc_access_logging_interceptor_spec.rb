@@ -16,7 +16,9 @@ describe GrpcAccessLoggingInterceptor do
     let(:request) { Google::Protobuf::StringValue.new(value: "World") }
     let(:call) { double(:call, peer: "ipv4:127.0.0.1:63634", metadata: metadata) }
     let(:metadata) {
-      { "user-agent" => "grpc-node/1.19.0 grpc-c/7.0.0 (linux; chttp2; gold)" }
+      {
+        "user-agent" => "grpc-node/1.19.0 grpc-c/7.0.0 (linux; chttp2; gold)".encode(Encoding::ASCII_8BIT),
+      }
     }
     let(:method) { service_class.new.method(:hello_rpc) }
     let(:service_class) {
@@ -118,7 +120,7 @@ describe GrpcAccessLoggingInterceptor do
       let(:options) { {} }
       let(:metadata) {
         {
-          "user-agent"  => "grpc-node/1.19.0 grpc-c/7.0.0 (linux; chttp2; gold)",
+          "user-agent"  => "grpc-node/1.19.0 grpc-c/7.0.0 (linux; chttp2; gold)".encode(Encoding::ASCII_8BIT),
           "binary-data" => [234].pack('c*'), # "\xEA", Binary data
         }
       }

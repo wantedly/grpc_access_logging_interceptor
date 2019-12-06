@@ -78,8 +78,12 @@ module GrpcAccessLoggingInterceptor
       h = {}
       metadata.each do |k, v|
         if v.is_a?(String) && v.encoding == Encoding::ASCII_8BIT
-          # If the value is binary, encode with Base64
-          h[k] = Base64.strict_encode64(v)
+          begin
+            h[k] = v.encode(Encoding::UTF_8)
+          rescue Encoding::UndefinedConversionError
+            # If the value is binary, encode with Base64
+            h[k] = Base64.strict_encode64(v)
+          end
         else
           h[k] = v
         end
