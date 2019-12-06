@@ -114,6 +114,34 @@ describe GrpcAccessLoggingInterceptor do
       end
     end
 
+    context "when metadata is binary" do
+      let(:options) { {} }
+      let(:metadata) {
+        {
+          "user-agent"  => "grpc-node/1.19.0 grpc-c/7.0.0 (linux; chttp2; gold)",
+          "binary-data" => [234].pack('c*'), # "\xEA", Binary data
+        }
+      }
+
+      it "logs an access log" do
+        Timecop.freeze(Time.new(2019, 3, 15, 0, 0)) do
+          interceptor.request_response(request: request, call: call, method: method) { }
+        end
+        expect(mocked_logger.logged).to eq [
+          {
+            accessed_at:      "2019-03-15 00:00:00.000000",
+            grpc_metadata:    "{\"user-agent\":\"grpc-node/1.19.0 grpc-c/7.0.0 (linux; chttp2; gold)\",\"binary-data\":\"6g==\"}",
+            grpc_method:      "/test.Test/HelloRpc",
+            grpc_status_code: 0,
+            params:           "{\"value\":\"World\"}",
+            remote_addr:      "127.0.0.1",
+            response_time_ms: 0.0,
+            user_agent:       "grpc-node/1.19.0 grpc-c/7.0.0 (linux; chttp2; gold)",
+          }
+        ]
+      end
+    end
+
     context "when params_filter is specified" do
       let(:options) {
         {
