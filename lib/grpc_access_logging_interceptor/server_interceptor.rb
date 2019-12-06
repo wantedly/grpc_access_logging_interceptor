@@ -22,16 +22,18 @@ module GrpcAccessLoggingInterceptor
     # @param [Method] method
     #
     def request_response(request:, call:, method:)
+      data = {} # Initialize at first to avoid nil
+
       accessed_at = Time.now
 
-      data = {
+      data.merge!({
         remote_addr:   remote_addr(call.peer),
         accessed_at:   accessed_at.utc.strftime('%Y-%m-%d %H:%M:%S.%6N'),
         params:        filter(request.to_h).to_json,
         user_agent:    call.metadata[USER_AGENT_KEY],
         grpc_method:   grpc_method(method),
         grpc_metadata: call.metadata.to_json,
-      }
+      })
       data.merge!(custom_data(request: request, call: call, method: method))
 
       yield

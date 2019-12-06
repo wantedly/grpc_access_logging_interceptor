@@ -64,7 +64,7 @@ describe GrpcAccessLoggingInterceptor do
       end
     end
 
-    context "when an exception occurs" do
+    context "when an exception occurs in yield" do
       let(:options) { {} }
 
       it "logs an access log with failure status code" do
@@ -86,6 +86,29 @@ describe GrpcAccessLoggingInterceptor do
             remote_addr:      "127.0.0.1",
             response_time_ms: 0.0,
             user_agent:       "grpc-node/1.19.0 grpc-c/7.0.0 (linux; chttp2; gold)",
+          }
+        ]
+      end
+    end
+
+    context "when an exception occurs when setting information to data" do
+      let(:options) { {} }
+
+      before do
+        allow(interceptor).to receive(:remote_addr).and_raise("Unknown Error")
+      end
+
+      it "logs an access log with failure status code" do
+        expect {
+          Timecop.freeze(Time.new(2019, 3, 15, 0, 0)) do
+            interceptor.request_response(request: request, call: call, method: method) {}
+          end
+        }.to raise_error("Unknown Error")
+
+        expect(mocked_logger.logged).to eq [
+          {
+            grpc_status_code: 2,  # GRPC::Unknown
+            response_time_ms: 0.0
           }
         ]
       end
