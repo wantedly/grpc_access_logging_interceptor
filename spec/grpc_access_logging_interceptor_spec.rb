@@ -120,8 +120,8 @@ describe GrpcAccessLoggingInterceptor do
       let(:options) { {} }
       let(:metadata) {
         {
-          "user-agent"  => "grpc-node/1.19.0 grpc-c/7.0.0 (linux; chttp2; gold)".encode(Encoding::ASCII_8BIT),
-          "binary-data" => [234].pack('c*'), # "\xEA", Binary data
+          "user-agent"      => "grpc-node/1.19.0 grpc-c/7.0.0 (linux; chttp2; gold)".encode(Encoding::ASCII_8BIT),
+          "binary-data-bin" => [234].pack('c*'), # "\xEA", Binary data
         }
       }
 
@@ -132,7 +132,7 @@ describe GrpcAccessLoggingInterceptor do
         expect(mocked_logger.logged).to eq [
           {
             accessed_at:      "2019-03-15 00:00:00.000000",
-            grpc_metadata:    "{\"user-agent\":\"grpc-node/1.19.0 grpc-c/7.0.0 (linux; chttp2; gold)\",\"binary-data\":\"6g==\"}",
+            grpc_metadata:    "{\"user-agent\":\"grpc-node/1.19.0 grpc-c/7.0.0 (linux; chttp2; gold)\",\"binary-data-bin\":\"6g==\"}",
             grpc_method:      "/test.Test/HelloRpc",
             grpc_status_code: 0,
             params:           "{\"value\":\"World\"}",
