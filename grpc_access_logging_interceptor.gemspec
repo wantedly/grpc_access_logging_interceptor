@@ -33,4 +33,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "google-protobuf"
   spec.add_development_dependency "timecop"
   spec.add_dependency "grpc"
+  spec.add_dependency "gmsc"
 end

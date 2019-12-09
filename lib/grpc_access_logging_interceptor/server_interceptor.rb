@@ -1,4 +1,5 @@
 require "base64"
+require "gmsc"
 require "grpc"
 require "grpc_access_logging_interceptor/default_logger"
 
@@ -33,7 +34,7 @@ module GrpcAccessLoggingInterceptor
         params:        filter(request.to_h).to_json,
         user_agent:    call.metadata[USER_AGENT_KEY],
         grpc_method:   grpc_method(method),
-        grpc_metadata: jsonize(call.metadata),
+        grpc_metadata: GMSC.safe_convert(call.metadata).to_json,
       })
       data.merge!(custom_data(request: request, call: call, method: method))
 
@@ -70,25 +71,6 @@ module GrpcAccessLoggingInterceptor
       # e.g. /google.pubsub.v2.PublisherService/CreateTopic.
       # cf. https://github.com/grpc/grpc/blob/v1.24.0/doc/PROTOCOL-HTTP2.md
       "/#{method.owner.service_name}/#{camelize(method.name.to_s)}"
-    end
-
-    # @param [Hash] metadata
-    # @return [String]
-    def jsonize(metadata)
-      h = {}
-      metadata.each do |k, v|
-        if v.is_a?(String) && v.encoding == Encoding::ASCII_8BIT
-          begin
-            h[k] = v.encode(Encoding::UTF_8)
-          rescue Encoding::UndefinedConversionError
-            # If the value is binary, encode with Base64
-            h[k] = Base64.strict_encode64(v)
-          end
-        else
-          h[k] = v
-        end
-      end
-      h.to_json
     end
 
     # @param [String] term
