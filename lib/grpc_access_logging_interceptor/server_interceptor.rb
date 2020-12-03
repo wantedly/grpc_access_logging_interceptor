@@ -70,7 +70,7 @@ module GrpcAccessLoggingInterceptor
       # We use path, which is represented as "/" Service-Name "/" {method name}
       # e.g. /google.pubsub.v2.PublisherService/CreateTopic.
       # cf. https://github.com/grpc/grpc/blob/v1.24.0/doc/PROTOCOL-HTTP2.md
-      "/#{method.owner.service_name}/#{camelize(method.name.to_s)}"
+      "/#{method.receiver.class.service_name}/#{camelize(method.name.to_s)}"
     end
 
     # @param [String] term
