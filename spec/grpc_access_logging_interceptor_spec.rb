@@ -18,6 +18,7 @@ describe GrpcAccessLoggingInterceptor do
     let(:metadata) {
       {
         "user-agent" => "grpc-node/1.19.0 grpc-c/7.0.0 (linux; chttp2; gold)".encode(Encoding::ASCII_8BIT),
+        "authorization" => "basic dXNlcjpwYXNz",
       }
     }
     let(:method) { service_class.new.method(:hello_rpc) }
