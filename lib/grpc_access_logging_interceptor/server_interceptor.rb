@@ -6,6 +6,8 @@ require "grpc_access_logging_interceptor/default_logger"
 module GrpcAccessLoggingInterceptor
   class ServerInterceptor < GRPC::ServerInterceptor
     USER_AGENT_KEY = "user-agent"
+    # Credentials such as Basic auth must not be written to access logs
+    AUTHORIZATION_KEY = "authorization"
 
     # @param [#log] logger
     # @param [#filter, nil] params_filter
@@ -34,7 +36,7 @@ module GrpcAccessLoggingInterceptor
         params:        filter(request.to_h).to_json,
         user_agent:    call.metadata[USER_AGENT_KEY],
         grpc_method:   grpc_method(method),
-        grpc_metadata: GMSC.safe_convert(call.metadata).to_json,
+        grpc_metadata: GMSC.safe_convert(call.metadata.except(AUTHORIZATION_KEY)).to_json,
       })
       data.merge!(custom_data(request: request, call: call, method: method))
 
